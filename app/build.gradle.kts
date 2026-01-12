@@ -15,6 +15,10 @@ android {
         versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     buildTypes {
@@ -49,6 +53,31 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    val jllamaLib = file("java-llama.cpp")
+    if (jllamaLib.exists()) {
+        if (!file("$jllamaLib/target").exists()) {
+            runCatching {
+                project.exec {
+                    commandLine = listOf("mvn", "compile")
+                    workingDir = jllamaLib
+                }
+            }
+        }
+
+        externalNativeBuild {
+            cmake {
+                path = file("$jllamaLib/CMakeLists.txt")
+                version = "3.22.1"
+            }
+        }
+
+        sourceSets {
+            named("main") {
+                java.srcDir("$jllamaLib/src/main/java")
+            }
+        }
+    }
 }
 
 dependencies {
@@ -56,6 +85,7 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("com.google.android.material:material:1.11.0")
 

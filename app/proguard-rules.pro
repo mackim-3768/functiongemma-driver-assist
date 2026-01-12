@@ -1,0 +1,2 @@
+
+-keep class de.kherud.llama.** { *; }

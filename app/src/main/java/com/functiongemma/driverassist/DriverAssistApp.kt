@@ -22,6 +22,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
@@ -69,6 +70,8 @@ private fun SelectorPanel(
     llmModelPath: String,
     onUseLlmChanged: (Boolean) -> Unit,
     onLlmModelPathChanged: (String) -> Unit,
+    modelDownloadState: DriverAssistViewModel.ModelDownloadState,
+    onDownloadModel: () -> Unit,
 ) {
     Card(modifier = modifier) {
         Column(
@@ -104,6 +107,64 @@ private fun SelectorPanel(
                 label = { Text("GGUF model path") },
                 singleLine = true,
             )
+
+            Text(
+                text = "Model: ${modelDownloadState.phase.name}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            if (modelDownloadState.resolvedModelPath.isNotBlank()) {
+                Text(
+                    text = "Resolved: ${modelDownloadState.resolvedModelPath}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            if (modelDownloadState.phase == DriverAssistViewModel.ModelDownloadPhase.Downloading) {
+                val frac = modelDownloadState.progressFraction
+                if (frac != null) {
+                    LinearProgressIndicator(progress = frac, modifier = Modifier.fillMaxWidth())
+                } else {
+                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                }
+                Text(
+                    text = "${modelDownloadState.bytesDownloaded} / ${modelDownloadState.bytesTotal} bytes",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            if (modelDownloadState.phase == DriverAssistViewModel.ModelDownloadPhase.Error) {
+                Text(
+                    text = "Error: ${modelDownloadState.message}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+
+            val downloading = modelDownloadState.phase == DriverAssistViewModel.ModelDownloadPhase.Downloading ||
+                modelDownloadState.phase == DriverAssistViewModel.ModelDownloadPhase.Checking
+
+            Button(
+                onClick = onDownloadModel,
+                enabled = useLlm && !downloading,
+            ) {
+                Text(
+                    text = when (modelDownloadState.phase) {
+                        DriverAssistViewModel.ModelDownloadPhase.Error -> "Retry Download"
+                        DriverAssistViewModel.ModelDownloadPhase.Ready -> "Re-download"
+                        else -> "Download"
+                    },
+                )
+            }
         }
     }
 }
@@ -260,6 +321,8 @@ private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
                 llmModelPath = viewModel.llmModelPath,
                 onUseLlmChanged = viewModel::setUseLlm,
                 onLlmModelPathChanged = viewModel::setLlmModelPath,
+                modelDownloadState = viewModel.modelDownloadState,
+                onDownloadModel = viewModel::downloadModelNow,
                 onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
                 onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
                 onDrowsyChange = viewModel::setDrowsy,
@@ -344,6 +407,8 @@ private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
                 llmModelPath = viewModel.llmModelPath,
                 onUseLlmChanged = viewModel::setUseLlm,
                 onLlmModelPathChanged = viewModel::setLlmModelPath,
+                modelDownloadState = viewModel.modelDownloadState,
+                onDownloadModel = viewModel::downloadModelNow,
                 onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
                 onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
                 onDrowsyChange = viewModel::setDrowsy,
@@ -421,6 +486,8 @@ private fun MainPanel(
     llmModelPath: String,
     onUseLlmChanged: (Boolean) -> Unit,
     onLlmModelPathChanged: (String) -> Unit,
+    modelDownloadState: DriverAssistViewModel.ModelDownloadState,
+    onDownloadModel: () -> Unit,
     onLaneDepartureDepartedChange: (Boolean) -> Unit,
     onLaneDepartureConfidenceChange: (Double) -> Unit,
     onDrowsyChange: (Boolean) -> Unit,
@@ -459,6 +526,8 @@ private fun MainPanel(
             llmModelPath = llmModelPath,
             onUseLlmChanged = onUseLlmChanged,
             onLlmModelPathChanged = onLlmModelPathChanged,
+            modelDownloadState = modelDownloadState,
+            onDownloadModel = onDownloadModel,
         )
 
         Card(modifier = Modifier.fillMaxWidth()) {
@@ -536,6 +605,8 @@ private fun MainPanelCompact(
     llmModelPath: String,
     onUseLlmChanged: (Boolean) -> Unit,
     onLlmModelPathChanged: (String) -> Unit,
+    modelDownloadState: DriverAssistViewModel.ModelDownloadState,
+    onDownloadModel: () -> Unit,
     onLaneDepartureDepartedChange: (Boolean) -> Unit,
     onLaneDepartureConfidenceChange: (Double) -> Unit,
     onDrowsyChange: (Boolean) -> Unit,
@@ -580,6 +651,8 @@ private fun MainPanelCompact(
                 llmModelPath = llmModelPath,
                 onUseLlmChanged = onUseLlmChanged,
                 onLlmModelPathChanged = onLlmModelPathChanged,
+                modelDownloadState = modelDownloadState,
+                onDownloadModel = onDownloadModel,
             )
         }
 

@@ -1,0 +1,5 @@
+model_url: ""
+hf_token: ""
+preferred_model_path: "/data/local/tmp/functiongemma/model.gguf"
+fallback_relative_path: "models/functiongemma/model.gguf"
+auto_download_on_start: true

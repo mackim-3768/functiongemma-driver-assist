@@ -1,16 +1,63 @@
 package com.functiongemma.driverassist
 
+import android.app.Application
+import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
 class DriverAssistViewModel(
-    private val selector: FunctionSelector = StubFunctionSelector(),
-    private val mockVehicleSystem: MockVehicleSystem = MockVehicleSystem(),
-) : ViewModel() {
+    application: Application,
+    private val selector: FunctionSelector,
+    private val mockVehicleSystem: MockVehicleSystem,
+) : AndroidViewModel(application) {
+
+    constructor(application: Application) : this(
+        application = application,
+        selector = StubFunctionSelector(),
+        mockVehicleSystem = MockVehicleSystem(),
+    )
+
+    enum class ModelDownloadPhase {
+        Idle,
+        Checking,
+        Downloading,
+        Ready,
+        Error,
+    }
+
+    data class ModelDownloadState(
+        val phase: ModelDownloadPhase = ModelDownloadPhase.Idle,
+        val resolvedModelPath: String = "",
+        val bytesDownloaded: Long = 0L,
+        val bytesTotal: Long = 0L,
+        val message: String = "",
+    ) {
+        val progressFraction: Float?
+            get() = if (phase == ModelDownloadPhase.Downloading && bytesTotal > 0L) {
+                bytesDownloaded.toFloat() / bytesTotal.toFloat()
+            } else {
+                null
+            }
+    }
+
+    private val appConfig: AppConfig? = runCatching {
+        AppConfigLoader.load(getApplication())
+    }.getOrNull()
+
+    private var modelDownloadJob: Job? = null
+
+    var modelDownloadState by mutableStateOf(ModelDownloadState())
+        private set
 
     val scenarios: List<Scenario> = listOf(
         Scenario(
@@ -182,6 +229,23 @@ class DriverAssistViewModel(
 
     private var llamaSelector: LlamaCppFunctionSelector? = null
 
+    init {
+        val config = appConfig
+        if (config != null) {
+            if (llmModelPath.isBlank() && config.preferredModelPath.isNotBlank()) {
+                llmModelPath = config.preferredModelPath
+            }
+            if (config.autoDownloadOnStart) {
+                ensureModelReady(forceDownload = false)
+            }
+        } else {
+            modelDownloadState = ModelDownloadState(
+                phase = ModelDownloadPhase.Error,
+                message = "config_load_failed",
+            )
+        }
+    }
+
     var vehicleState by mutableStateOf(MockVehicleState())
         private set
 
@@ -239,6 +303,8 @@ class DriverAssistViewModel(
         useLlm = enabled
         if (!enabled) {
             closeLlm()
+        } else {
+            ensureModelReady(forceDownload = false)
         }
     }
 
@@ -268,6 +334,114 @@ class DriverAssistViewModel(
     override fun onCleared() {
         closeLlm()
         super.onCleared()
+    }
+
+    fun downloadModelNow() {
+        ensureModelReady(forceDownload = true)
+    }
+
+    private fun ensureModelReady(forceDownload: Boolean) {
+        val config = appConfig ?: run {
+            modelDownloadState = ModelDownloadState(
+                phase = ModelDownloadPhase.Error,
+                message = "config_load_failed",
+            )
+            return
+        }
+
+        if (modelDownloadJob?.isActive == true) return
+
+        modelDownloadJob = viewModelScope.launch {
+            modelDownloadState = modelDownloadState.copy(
+                phase = ModelDownloadPhase.Checking,
+                message = "",
+            )
+
+            val preferred = runCatching { File(config.preferredModelPath) }.getOrNull()
+            val fallback = resolveFallbackFile(config)
+
+            val preferredOk = preferred != null && preferred.exists() && preferred.length() > 0L
+            val fallbackOk = fallback.exists() && fallback.length() > 0L
+
+            if (!forceDownload) {
+                if (preferredOk) {
+                    setModelReady(preferred!!.absolutePath)
+                    return@launch
+                }
+                if (fallbackOk) {
+                    setModelReady(fallback.absolutePath)
+                    return@launch
+                }
+            }
+
+            if (config.modelUrl.isBlank()) {
+                modelDownloadState = ModelDownloadState(
+                    phase = ModelDownloadPhase.Error,
+                    message = "model_url_blank",
+                )
+                return@launch
+            }
+
+            val candidates = buildList {
+                if (preferred != null && preferred.path.isNotBlank()) add(preferred)
+                if (fallback.path.isNotBlank()) add(fallback)
+            }.distinctBy { it.absolutePath }
+
+            var lastError: Throwable? = null
+            for (dest in candidates) {
+                try {
+                    var lastProgressUpdateMs = 0L
+
+                    withContext(Dispatchers.IO) {
+                        ModelDownloader.downloadToFile(
+                            url = config.modelUrl,
+                            hfToken = config.hfToken,
+                            destFile = dest,
+                        ) { p ->
+                            val now = SystemClock.elapsedRealtime()
+                            if (now - lastProgressUpdateMs >= 250L) {
+                                lastProgressUpdateMs = now
+                                viewModelScope.launch {
+                                    modelDownloadState = ModelDownloadState(
+                                        phase = ModelDownloadPhase.Downloading,
+                                        resolvedModelPath = dest.absolutePath,
+                                        bytesDownloaded = p.bytesDownloaded,
+                                        bytesTotal = p.bytesTotal,
+                                        message = "downloading",
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    setModelReady(dest.absolutePath)
+                    return@launch
+                } catch (t: Throwable) {
+                    lastError = t
+                }
+            }
+
+            val msg = (lastError?.message ?: lastError?.javaClass?.simpleName ?: "download_failed").take(200)
+            modelDownloadState = ModelDownloadState(
+                phase = ModelDownloadPhase.Error,
+                message = msg,
+            )
+        }
+    }
+
+    private fun resolveFallbackFile(config: AppConfig): File {
+        val app = getApplication<Application>()
+        val base = app.getExternalFilesDir(null) ?: app.filesDir
+        return File(base, config.fallbackRelativePath)
+    }
+
+    private fun setModelReady(path: String) {
+        modelDownloadState = ModelDownloadState(
+            phase = ModelDownloadPhase.Ready,
+            resolvedModelPath = path,
+            message = "ready",
+        )
+        setLlmModelPath(path)
     }
 
     private fun actionsToJson(actions: List<VehicleAction>): String {
