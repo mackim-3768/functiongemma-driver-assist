@@ -127,7 +127,7 @@ class DriverAssistViewModel(
         prompt = value
     }
 
-    fun setEngineerModeEnabled(enabled: Boolean) {
+    fun setEngineerMode(enabled: Boolean) {
         engineerModeEnabled = enabled
     }
 
