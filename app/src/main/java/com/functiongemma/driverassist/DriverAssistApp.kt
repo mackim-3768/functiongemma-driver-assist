@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +25,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlin.math.roundToInt
 
 @Composable
 fun DriverAssistApp(viewModel: DriverAssistViewModel = viewModel()) {
@@ -55,7 +56,128 @@ fun DriverAssistApp(viewModel: DriverAssistViewModel = viewModel()) {
                 } else {
                     DriverAssistWideLayout(viewModel = viewModel)
                 }
+
             }
+        }
+    }
+}
+
+@Composable
+private fun InputToolsPanel(
+    modifier: Modifier,
+    context: DriverAssistContext,
+    onLaneDepartureDepartedChange: (Boolean) -> Unit,
+    onLaneDepartureConfidenceChange: (Double) -> Unit,
+    onDrowsyChange: (Boolean) -> Unit,
+    onDrowsinessConfidenceChange: (Double) -> Unit,
+    onHandsOnChange: (Boolean) -> Unit,
+    onSpeedKphChange: (Int) -> Unit,
+    onForwardCollisionRiskChange: (Double) -> Unit,
+    onDrivingDurationMinutesChange: (Int) -> Unit,
+) {
+    Card(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(text = "Input Tools", fontWeight = FontWeight.SemiBold)
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "get_lane_departure_status", style = MaterialTheme.typography.labelSmall)
+                    Text(text = "departed", style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(
+                    checked = context.laneDeparture.departed,
+                    onCheckedChange = onLaneDepartureDepartedChange,
+                )
+            }
+
+            Text(
+                text = "confidence: ${(context.laneDeparture.confidence * 100).roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Slider(
+                value = context.laneDeparture.confidence.toFloat(),
+                onValueChange = { onLaneDepartureConfidenceChange(it.toDouble()) },
+                valueRange = 0f..1f,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "get_driver_drowsiness_status", style = MaterialTheme.typography.labelSmall)
+                    Text(text = "drowsy", style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(
+                    checked = context.drowsiness.drowsy,
+                    onCheckedChange = onDrowsyChange,
+                )
+            }
+
+            Text(
+                text = "confidence: ${(context.drowsiness.confidence * 100).roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Slider(
+                value = context.drowsiness.confidence.toFloat(),
+                onValueChange = { onDrowsinessConfidenceChange(it.toDouble()) },
+                valueRange = 0f..1f,
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "get_steering_grip_status", style = MaterialTheme.typography.labelSmall)
+                    Text(text = "hands_on", style = MaterialTheme.typography.bodySmall)
+                }
+                Switch(
+                    checked = context.steeringGrip.handsOn,
+                    onCheckedChange = onHandsOnChange,
+                )
+            }
+
+            Text(
+                text = "get_vehicle_speed: ${context.speedKph} km/h",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Slider(
+                value = context.speedKph.toFloat(),
+                onValueChange = { onSpeedKphChange(it.roundToInt()) },
+                valueRange = 0f..240f,
+            )
+
+            Text(
+                text = "get_forward_collision_risk: ${(context.forwardCollisionRisk * 100).roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Slider(
+                value = context.forwardCollisionRisk.toFloat(),
+                onValueChange = { onForwardCollisionRiskChange(it.toDouble()) },
+                valueRange = 0f..1f,
+            )
+
+            Text(
+                text = "get_driving_duration_status: ${context.drivingDurationMinutes} min",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Slider(
+                value = context.drivingDurationMinutes.toFloat(),
+                onValueChange = { onDrivingDurationMinutesChange(it.roundToInt()) },
+                valueRange = 0f..240f,
+            )
         }
     }
 }
@@ -88,6 +210,14 @@ private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerModeEnabled,
+                onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
+                onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
+                onDrowsyChange = viewModel::setDrowsy,
+                onDrowsinessConfidenceChange = viewModel::setDrowsinessConfidence,
+                onHandsOnChange = viewModel::setHandsOn,
+                onSpeedKphChange = viewModel::setSpeedKph,
+                onForwardCollisionRiskChange = viewModel::setForwardCollisionRisk,
+                onDrivingDurationMinutesChange = viewModel::setDrivingDurationMinutes,
             )
         }
 
@@ -160,6 +290,14 @@ private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerModeEnabled,
+                onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
+                onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
+                onDrowsyChange = viewModel::setDrowsy,
+                onDrowsinessConfidenceChange = viewModel::setDrowsinessConfidence,
+                onHandsOnChange = viewModel::setHandsOn,
+                onSpeedKphChange = viewModel::setSpeedKph,
+                onForwardCollisionRiskChange = viewModel::setForwardCollisionRisk,
+                onDrivingDurationMinutesChange = viewModel::setDrivingDurationMinutes,
             )
         }
 
@@ -225,6 +363,14 @@ private fun MainPanel(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    onLaneDepartureDepartedChange: (Boolean) -> Unit,
+    onLaneDepartureConfidenceChange: (Double) -> Unit,
+    onDrowsyChange: (Boolean) -> Unit,
+    onDrowsinessConfidenceChange: (Double) -> Unit,
+    onHandsOnChange: (Boolean) -> Unit,
+    onSpeedKphChange: (Int) -> Unit,
+    onForwardCollisionRiskChange: (Double) -> Unit,
+    onDrivingDurationMinutesChange: (Int) -> Unit,
 ) {
     Column(
         modifier = modifier,
@@ -234,6 +380,19 @@ private fun MainPanel(
             modifier = Modifier.fillMaxWidth(),
             context = context,
             warningLevel = vehicleState.warningLevel,
+        )
+
+        InputToolsPanel(
+            modifier = Modifier.fillMaxWidth(),
+            context = context,
+            onLaneDepartureDepartedChange = onLaneDepartureDepartedChange,
+            onLaneDepartureConfidenceChange = onLaneDepartureConfidenceChange,
+            onDrowsyChange = onDrowsyChange,
+            onDrowsinessConfidenceChange = onDrowsinessConfidenceChange,
+            onHandsOnChange = onHandsOnChange,
+            onSpeedKphChange = onSpeedKphChange,
+            onForwardCollisionRiskChange = onForwardCollisionRiskChange,
+            onDrivingDurationMinutesChange = onDrivingDurationMinutesChange,
         )
 
         Card(modifier = Modifier.fillMaxWidth()) {
@@ -307,6 +466,14 @@ private fun MainPanelCompact(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    onLaneDepartureDepartedChange: (Boolean) -> Unit,
+    onLaneDepartureConfidenceChange: (Double) -> Unit,
+    onDrowsyChange: (Boolean) -> Unit,
+    onDrowsinessConfidenceChange: (Double) -> Unit,
+    onHandsOnChange: (Boolean) -> Unit,
+    onSpeedKphChange: (Int) -> Unit,
+    onForwardCollisionRiskChange: (Double) -> Unit,
+    onDrivingDurationMinutesChange: (Int) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
@@ -318,6 +485,21 @@ private fun MainPanelCompact(
                 modifier = Modifier.fillMaxWidth(),
                 context = context,
                 warningLevel = vehicleState.warningLevel,
+            )
+        }
+
+        item {
+            InputToolsPanel(
+                modifier = Modifier.fillMaxWidth(),
+                context = context,
+                onLaneDepartureDepartedChange = onLaneDepartureDepartedChange,
+                onLaneDepartureConfidenceChange = onLaneDepartureConfidenceChange,
+                onDrowsyChange = onDrowsyChange,
+                onDrowsinessConfidenceChange = onDrowsinessConfidenceChange,
+                onHandsOnChange = onHandsOnChange,
+                onSpeedKphChange = onSpeedKphChange,
+                onForwardCollisionRiskChange = onForwardCollisionRiskChange,
+                onDrivingDurationMinutesChange = onDrivingDurationMinutesChange,
             )
         }
 

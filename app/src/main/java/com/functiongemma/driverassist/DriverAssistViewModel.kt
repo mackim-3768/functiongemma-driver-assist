@@ -81,6 +81,42 @@ class DriverAssistViewModel(
     var vehicleState by mutableStateOf(MockVehicleState())
         private set
 
+    private fun updateContext(update: (DriverAssistContext) -> DriverAssistContext) {
+        context = update(context)
+    }
+
+    fun setLaneDepartureDeparted(departed: Boolean) {
+        updateContext { it.copy(laneDeparture = it.laneDeparture.copy(departed = departed)) }
+    }
+
+    fun setLaneDepartureConfidence(confidence: Double) {
+        updateContext { it.copy(laneDeparture = it.laneDeparture.copy(confidence = confidence.coerceIn(0.0, 1.0))) }
+    }
+
+    fun setDrowsy(drowsy: Boolean) {
+        updateContext { it.copy(drowsiness = it.drowsiness.copy(drowsy = drowsy)) }
+    }
+
+    fun setDrowsinessConfidence(confidence: Double) {
+        updateContext { it.copy(drowsiness = it.drowsiness.copy(confidence = confidence.coerceIn(0.0, 1.0))) }
+    }
+
+    fun setHandsOn(handsOn: Boolean) {
+        updateContext { it.copy(steeringGrip = it.steeringGrip.copy(handsOn = handsOn)) }
+    }
+
+    fun setSpeedKph(speedKph: Int) {
+        updateContext { it.copy(speedKph = speedKph.coerceIn(0, 240)) }
+    }
+
+    fun setForwardCollisionRisk(risk: Double) {
+        updateContext { it.copy(forwardCollisionRisk = risk.coerceIn(0.0, 1.0)) }
+    }
+
+    fun setDrivingDurationMinutes(minutes: Int) {
+        updateContext { it.copy(drivingDurationMinutes = minutes.coerceIn(0, 600)) }
+    }
+
     fun selectScenario(scenario: Scenario) {
         selectedScenarioTitle = scenario.title
         context = scenario.context
