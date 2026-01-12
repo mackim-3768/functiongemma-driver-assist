@@ -1,14 +1,19 @@
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
 package com.functiongemma.driverassist
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.weight
@@ -19,60 +24,151 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun DriverAssistApp(viewModel: DriverAssistViewModel = viewModel()) {
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    ScenarioPanel(
-                        modifier = Modifier
-                            .weight(0.28f)
-                            .fillMaxSize(),
-                        scenarios = viewModel.scenarios,
-                        selectedTitle = viewModel.selectedScenarioTitle,
-                        onSelect = viewModel::selectScenario,
-                    )
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val isPhone = maxWidth < 600.dp
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    MainPanel(
-                        modifier = Modifier
-                            .weight(0.72f)
-                            .fillMaxSize(),
-                        context = viewModel.context,
-                        vehicleState = viewModel.vehicleState,
-                        engineerJson = viewModel.engineerJson,
-                        engineerModeEnabled = viewModel.engineerModeEnabled,
-                        onEngineerModeChanged = viewModel::setEngineerModeEnabled,
-                    )
+                if (isPhone) {
+                    DriverAssistPhoneLayout(viewModel = viewModel)
+                } else {
+                    DriverAssistWideLayout(viewModel = viewModel)
                 }
-
-                PromptBar(
-                    modifier = Modifier.fillMaxWidth(),
-                    prompt = viewModel.prompt,
-                    onPromptChange = viewModel::updatePrompt,
-                    onRun = viewModel::run,
-                )
             }
         }
+    }
+}
+
+@Composable
+private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            ScenarioPanel(
+                modifier = Modifier
+                    .weight(0.28f)
+                    .fillMaxSize(),
+                scenarios = viewModel.scenarios,
+                selectedTitle = viewModel.selectedScenarioTitle,
+                onSelect = viewModel::selectScenario,
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            MainPanel(
+                modifier = Modifier
+                    .weight(0.72f)
+                    .fillMaxSize(),
+                context = viewModel.context,
+                vehicleState = viewModel.vehicleState,
+                engineerJson = viewModel.engineerJson,
+                engineerModeEnabled = viewModel.engineerModeEnabled,
+                onEngineerModeChanged = viewModel::setEngineerModeEnabled,
+            )
+        }
+
+        PromptBar(
+            modifier = Modifier.fillMaxWidth(),
+            prompt = viewModel.prompt,
+            onPromptChange = viewModel::updatePrompt,
+            onRun = viewModel::run,
+        )
+    }
+}
+
+@Composable
+private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
+    var showScenarioSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    if (showScenarioSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showScenarioSheet = false },
+            sheetState = sheetState,
+        ) {
+            ScenarioPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                scenarios = viewModel.scenarios,
+                selectedTitle = viewModel.selectedScenarioTitle,
+                onSelect = {
+                    viewModel.selectScenario(it)
+                    showScenarioSheet = false
+                },
+            )
+        }
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Scenario", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(text = viewModel.selectedScenarioTitle, fontWeight = FontWeight.SemiBold)
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Button(onClick = { showScenarioSheet = true }) {
+                    Text("Select")
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            MainPanelCompact(
+                modifier = Modifier.fillMaxSize(),
+                context = viewModel.context,
+                vehicleState = viewModel.vehicleState,
+                engineerJson = viewModel.engineerJson,
+                engineerModeEnabled = viewModel.engineerModeEnabled,
+                onEngineerModeChanged = viewModel::setEngineerModeEnabled,
+            )
+        }
+
+        PromptBar(
+            modifier = Modifier.fillMaxWidth(),
+            prompt = viewModel.prompt,
+            onPromptChange = viewModel::updatePrompt,
+            onRun = viewModel::run,
+        )
     }
 }
 
@@ -196,6 +292,93 @@ private fun MainPanel(
                     items(vehicleState.events.reversed()) { ev ->
                         Text(text = "${ev.timestampMs}: ${ev.message}", style = MaterialTheme.typography.bodySmall)
                         Spacer(modifier = Modifier.height(6.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MainPanelCompact(
+    modifier: Modifier,
+    context: DriverAssistContext,
+    vehicleState: MockVehicleState,
+    engineerJson: String,
+    engineerModeEnabled: Boolean,
+    onEngineerModeChanged: (Boolean) -> Unit,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            HudPanel(
+                modifier = Modifier.fillMaxWidth(),
+                context = context,
+                warningLevel = vehicleState.warningLevel,
+            )
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(text = "Engineer Mode", fontWeight = FontWeight.SemiBold)
+                    Switch(
+                        checked = engineerModeEnabled,
+                        onCheckedChange = onEngineerModeChanged,
+                    )
+                }
+            }
+        }
+
+        if (engineerModeEnabled) {
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Text(text = "Function Call JSON", fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = engineerJson,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 240.dp)
+                                .verticalScroll(rememberScrollState()),
+                        )
+                    }
+                }
+            }
+        }
+
+        item {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(text = "Mock Vehicle Log", fontWeight = FontWeight.SemiBold)
+                    val recent = vehicleState.events.takeLast(30).asReversed()
+                    for (ev in recent) {
+                        Text(
+                            text = "${ev.timestampMs}: ${ev.message}",
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }
