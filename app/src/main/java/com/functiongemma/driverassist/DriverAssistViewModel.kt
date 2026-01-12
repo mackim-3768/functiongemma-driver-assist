@@ -14,23 +14,59 @@ class DriverAssistViewModel(
 
     val scenarios: List<Scenario> = listOf(
         Scenario(
-            title = "차선 이탈",
-            prompt = "차선 이탈이 감지됐고 운전자가 핸들을 잡지 않았어",
+            title = "정상 주행",
+            prompt = "상태 확인",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.1),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 80,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 10,
+            ),
+        ),
+        Scenario(
+            title = "차선 이탈(센서)",
+            prompt = "차선 이탈이 감지됐어",
             context = DriverAssistContext(
                 laneDeparture = LaneDepartureStatus(departed = true, confidence = 0.7),
                 drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.2),
-                steeringGrip = SteeringGripStatus(handsOn = false),
-                speedKph = 80,
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 85,
                 forwardCollisionRisk = 0.2,
                 drivingDurationMinutes = 20,
             ),
         ),
         Scenario(
-            title = "졸음",
+            title = "차선 이탈 + 핸들 미그립",
+            prompt = "차선 이탈이 감지됐고 운전자가 핸들을 잡지 않았어",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = true, confidence = 0.8),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.2),
+                steeringGrip = SteeringGripStatus(handsOn = false),
+                speedKph = 90,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 25,
+            ),
+        ),
+        Scenario(
+            title = "차선 이탈(프롬프트)",
+            prompt = "차선이 흔들리는 것 같아",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.2),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.2),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 70,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 15,
+            ),
+        ),
+        Scenario(
+            title = "졸음(센서)",
             prompt = "졸음 운전이 의심돼",
             context = DriverAssistContext(
                 laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
-                drowsiness = DriverDrowsinessStatus(drowsy = true, confidence = 0.8),
+                drowsiness = DriverDrowsinessStatus(drowsy = true, confidence = 0.85),
                 steeringGrip = SteeringGripStatus(handsOn = true),
                 speedKph = 70,
                 forwardCollisionRisk = 0.2,
@@ -38,7 +74,19 @@ class DriverAssistViewModel(
             ),
         ),
         Scenario(
-            title = "핸들 미그립",
+            title = "졸음(프롬프트)",
+            prompt = "졸 것 같아. 경고해줘",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.3),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 75,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 80,
+            ),
+        ),
+        Scenario(
+            title = "핸들 미그립(센서)",
             prompt = "운전자가 핸들을 잡지 않았어",
             context = DriverAssistContext(
                 laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
@@ -50,7 +98,19 @@ class DriverAssistViewModel(
             ),
         ),
         Scenario(
-            title = "전방 충돌",
+            title = "핸들 미그립(프롬프트)",
+            prompt = "핸들 미그립 같아",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.2),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 55,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 25,
+            ),
+        ),
+        Scenario(
+            title = "전방 충돌 위험(센서)",
             prompt = "전방 충돌 위험이 높아",
             context = DriverAssistContext(
                 laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
@@ -59,6 +119,42 @@ class DriverAssistViewModel(
                 speedKph = 90,
                 forwardCollisionRisk = 0.9,
                 drivingDurationMinutes = 15,
+            ),
+        ),
+        Scenario(
+            title = "전방 충돌 위험(프롬프트)",
+            prompt = "충돌 위험 같은데?",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.1),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.2),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 50,
+                forwardCollisionRisk = 0.2,
+                drivingDurationMinutes = 15,
+            ),
+        ),
+        Scenario(
+            title = "복합 위험(차선+졸음+충돌)",
+            prompt = "차선도 흔들리고 졸리고 전방 충돌 위험도 있어",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = true, confidence = 0.9),
+                drowsiness = DriverDrowsinessStatus(drowsy = true, confidence = 0.9),
+                steeringGrip = SteeringGripStatus(handsOn = false),
+                speedKph = 100,
+                forwardCollisionRisk = 0.95,
+                drivingDurationMinutes = 120,
+            ),
+        ),
+        Scenario(
+            title = "경계 상태(노이즈)",
+            prompt = "라인이 조금 흔들리는 느낌",
+            context = DriverAssistContext(
+                laneDeparture = LaneDepartureStatus(departed = false, confidence = 0.55),
+                drowsiness = DriverDrowsinessStatus(drowsy = false, confidence = 0.4),
+                steeringGrip = SteeringGripStatus(handsOn = true),
+                speedKph = 65,
+                forwardCollisionRisk = 0.6,
+                drivingDurationMinutes = 40,
             ),
         ),
     )
