@@ -174,6 +174,14 @@ class DriverAssistViewModel(
     var engineerJson by mutableStateOf("[]")
         private set
 
+    var useLlm by mutableStateOf(false)
+        private set
+
+    var llmModelPath by mutableStateOf("")
+        private set
+
+    private var llamaSelector: LlamaCppFunctionSelector? = null
+
     var vehicleState by mutableStateOf(MockVehicleState())
         private set
 
@@ -227,10 +235,39 @@ class DriverAssistViewModel(
         engineerModeEnabled = enabled
     }
 
+    fun setUseLlm(enabled: Boolean) {
+        useLlm = enabled
+        if (!enabled) {
+            closeLlm()
+        }
+    }
+
+    fun setLlmModelPath(path: String) {
+        if (path == llmModelPath) return
+        llmModelPath = path
+        closeLlm()
+    }
+
+    private fun closeLlm() {
+        llamaSelector?.close()
+        llamaSelector = null
+    }
+
     fun run() {
-        val actions = selector.select(context = context, prompt = prompt)
+        val selectorToUse = if (useLlm) {
+            llamaSelector ?: LlamaCppFunctionSelector(modelPath = llmModelPath).also { llamaSelector = it }
+        } else {
+            selector
+        }
+
+        val actions = selectorToUse.select(context = context, prompt = prompt)
         engineerJson = actionsToJson(actions)
         vehicleState = mockVehicleSystem.apply(vehicleState, actions)
+    }
+
+    override fun onCleared() {
+        closeLlm()
+        super.onCleared()
     }
 
     private fun actionsToJson(actions: List<VehicleAction>): String {

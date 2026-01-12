@@ -63,6 +63,52 @@ fun DriverAssistApp(viewModel: DriverAssistViewModel = viewModel()) {
 }
 
 @Composable
+private fun SelectorPanel(
+    modifier: Modifier,
+    useLlm: Boolean,
+    llmModelPath: String,
+    onUseLlmChanged: (Boolean) -> Unit,
+    onLlmModelPathChanged: (String) -> Unit,
+) {
+    Card(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = "Function Selector", fontWeight = FontWeight.SemiBold)
+                    Text(
+                        text = if (useLlm) "LLM(java-llama.cpp)" else "Stub",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = useLlm,
+                    onCheckedChange = onUseLlmChanged,
+                )
+            }
+
+            OutlinedTextField(
+                value = llmModelPath,
+                onValueChange = onLlmModelPathChanged,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = useLlm,
+                label = { Text("GGUF model path") },
+                singleLine = true,
+            )
+        }
+    }
+}
+
+@Composable
 private fun InputToolsPanel(
     modifier: Modifier,
     context: DriverAssistContext,
@@ -210,6 +256,10 @@ private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerMode,
+                useLlm = viewModel.useLlm,
+                llmModelPath = viewModel.llmModelPath,
+                onUseLlmChanged = viewModel::setUseLlm,
+                onLlmModelPathChanged = viewModel::setLlmModelPath,
                 onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
                 onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
                 onDrowsyChange = viewModel::setDrowsy,
@@ -290,6 +340,10 @@ private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerMode,
+                useLlm = viewModel.useLlm,
+                llmModelPath = viewModel.llmModelPath,
+                onUseLlmChanged = viewModel::setUseLlm,
+                onLlmModelPathChanged = viewModel::setLlmModelPath,
                 onLaneDepartureDepartedChange = viewModel::setLaneDepartureDeparted,
                 onLaneDepartureConfidenceChange = viewModel::setLaneDepartureConfidence,
                 onDrowsyChange = viewModel::setDrowsy,
@@ -363,6 +417,10 @@ private fun MainPanel(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    useLlm: Boolean,
+    llmModelPath: String,
+    onUseLlmChanged: (Boolean) -> Unit,
+    onLlmModelPathChanged: (String) -> Unit,
     onLaneDepartureDepartedChange: (Boolean) -> Unit,
     onLaneDepartureConfidenceChange: (Double) -> Unit,
     onDrowsyChange: (Boolean) -> Unit,
@@ -393,6 +451,14 @@ private fun MainPanel(
             onSpeedKphChange = onSpeedKphChange,
             onForwardCollisionRiskChange = onForwardCollisionRiskChange,
             onDrivingDurationMinutesChange = onDrivingDurationMinutesChange,
+        )
+
+        SelectorPanel(
+            modifier = Modifier.fillMaxWidth(),
+            useLlm = useLlm,
+            llmModelPath = llmModelPath,
+            onUseLlmChanged = onUseLlmChanged,
+            onLlmModelPathChanged = onLlmModelPathChanged,
         )
 
         Card(modifier = Modifier.fillMaxWidth()) {
@@ -466,6 +532,10 @@ private fun MainPanelCompact(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    useLlm: Boolean,
+    llmModelPath: String,
+    onUseLlmChanged: (Boolean) -> Unit,
+    onLlmModelPathChanged: (String) -> Unit,
     onLaneDepartureDepartedChange: (Boolean) -> Unit,
     onLaneDepartureConfidenceChange: (Double) -> Unit,
     onDrowsyChange: (Boolean) -> Unit,
@@ -500,6 +570,16 @@ private fun MainPanelCompact(
                 onSpeedKphChange = onSpeedKphChange,
                 onForwardCollisionRiskChange = onForwardCollisionRiskChange,
                 onDrivingDurationMinutesChange = onDrivingDurationMinutesChange,
+            )
+        }
+
+        item {
+            SelectorPanel(
+                modifier = Modifier.fillMaxWidth(),
+                useLlm = useLlm,
+                llmModelPath = llmModelPath,
+                onUseLlmChanged = onUseLlmChanged,
+                onLlmModelPathChanged = onLlmModelPathChanged,
             )
         }
 
