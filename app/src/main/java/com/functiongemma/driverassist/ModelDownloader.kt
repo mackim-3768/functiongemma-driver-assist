@@ -7,6 +7,8 @@ import java.net.URL
 
 object ModelDownloader {
 
+     private val GGUF_MAGIC = byteArrayOf(0x47, 0x47, 0x55, 0x46)
+
     data class Progress(
         val bytesDownloaded: Long,
         val bytesTotal: Long,
@@ -57,6 +59,30 @@ object ModelDownloader {
 
             conn.inputStream.use { input ->
                 FileOutputStream(tmpFile).use { output ->
+                    val header = ByteArray(4)
+                    val headerRead = input.read(header)
+                    if (headerRead != 4 || !header.contentEquals(GGUF_MAGIC)) {
+                        val preview = ByteArray(512)
+                        val previewRead = input.read(preview).coerceAtLeast(0)
+                        val combined = ByteArray(headerRead.coerceAtLeast(0) + previewRead)
+                        if (headerRead > 0) {
+                            System.arraycopy(header, 0, combined, 0, headerRead)
+                        }
+                        if (previewRead > 0) {
+                            System.arraycopy(preview, 0, combined, headerRead.coerceAtLeast(0), previewRead)
+                        }
+                        val textPreview = runCatching { String(combined, Charsets.UTF_8) }.getOrNull().orEmpty()
+                        val msg = (
+                            "Downloaded file is not a GGUF model. " +
+                                "url=${AppLog.summarizeUrl(url)} content_type=${conn.contentType} " +
+                                "preview=${textPreview.replace("\n", " ").take(200)}"
+                            ).trim()
+                        throw IllegalStateException(msg)
+                    }
+                    output.write(header)
+                    downloaded += headerRead
+                    onProgress(Progress(bytesDownloaded = downloaded, bytesTotal = total))
+
                     val buf = ByteArray(256 * 1024)
                     while (true) {
                         val read = input.read(buf)

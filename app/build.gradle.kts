@@ -7,6 +7,11 @@ android {
     namespace = "com.functiongemma.driverassist"
     compileSdk = 34
 
+    val jllamaLib = listOf(
+        file("java-llama.cpp"),
+        rootProject.file("java-llama.cpp"),
+    ).firstOrNull { it.exists() }
+
     defaultConfig {
         applicationId = "com.functiongemma.driverassist"
         minSdk = 26
@@ -18,6 +23,17 @@ android {
 
         ndk {
             abiFilters += "arm64-v8a"
+        }
+
+        if (jllamaLib != null) {
+            externalNativeBuild {
+                cmake {
+                    arguments += listOf(
+                        "-DOS_NAME=Linux-Android",
+                        "-DOS_ARCH=aarch64",
+                    )
+                }
+            }
         }
     }
 
@@ -54,17 +70,7 @@ android {
         }
     }
 
-    val jllamaLib = file("java-llama.cpp")
-    if (jllamaLib.exists()) {
-        if (!file("$jllamaLib/target").exists()) {
-            runCatching {
-                project.exec {
-                    commandLine = listOf("mvn", "compile")
-                    workingDir = jllamaLib
-                }
-            }
-        }
-
+    if (jllamaLib != null) {
         externalNativeBuild {
             cmake {
                 path = file("$jllamaLib/CMakeLists.txt")
