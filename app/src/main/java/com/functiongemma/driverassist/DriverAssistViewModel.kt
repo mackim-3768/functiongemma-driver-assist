@@ -52,6 +52,8 @@ class DriverAssistViewModel(
 
     private val appConfig: AppConfig? = runCatching {
         AppConfigLoader.load(getApplication())
+    }.onFailure { e ->
+        AppLog.e("vm.config_load_failed", e)
     }.getOrNull()
 
     private var modelDownloadJob: Job? = null
@@ -230,20 +232,24 @@ class DriverAssistViewModel(
     private var llamaSelector: LlamaCppFunctionSelector? = null
 
     init {
+        AppLog.i("vm.init start")
         val config = appConfig
         if (config != null) {
             if (llmModelPath.isBlank() && config.preferredModelPath.isNotBlank()) {
                 llmModelPath = config.preferredModelPath
             }
             if (config.autoDownloadOnStart) {
+                AppLog.i("vm.init auto_download_on_start=true")
                 ensureModelReady(forceDownload = false)
             }
         } else {
+            AppLog.w("vm.init config_null")
             modelDownloadState = ModelDownloadState(
                 phase = ModelDownloadPhase.Error,
                 message = "config_load_failed",
             )
         }
+        AppLog.i("vm.init done useLlm=$useLlm llmModelPath=$llmModelPath")
     }
 
     var vehicleState by mutableStateOf(MockVehicleState())
@@ -286,20 +292,24 @@ class DriverAssistViewModel(
     }
 
     fun selectScenario(scenario: Scenario) {
+        AppLog.i("vm.selectScenario title=${scenario.title}")
         selectedScenarioTitle = scenario.title
         context = scenario.context
         prompt = scenario.prompt
     }
 
     fun updatePrompt(value: String) {
+        AppLog.i("vm.updatePrompt chars=${value.length}")
         prompt = value
     }
 
     fun setEngineerMode(enabled: Boolean) {
+        AppLog.i("vm.setEngineerMode enabled=$enabled")
         engineerModeEnabled = enabled
     }
 
     fun updateUseLlm(enabled: Boolean) {
+        AppLog.i("vm.updateUseLlm enabled=$enabled")
         useLlm = enabled
         if (!enabled) {
             closeLlm()
@@ -310,16 +320,21 @@ class DriverAssistViewModel(
 
     fun updateLlmModelPath(path: String) {
         if (path == llmModelPath) return
+        AppLog.i("vm.updateLlmModelPath path=$path")
         llmModelPath = path
         closeLlm()
     }
 
     private fun closeLlm() {
+        if (llamaSelector != null) {
+            AppLog.i("vm.closeLlm")
+        }
         llamaSelector?.close()
         llamaSelector = null
     }
 
     fun run() {
+        AppLog.i("vm.run start useLlm=$useLlm scenario=$selectedScenarioTitle")
         val selectorToUse = if (useLlm) {
             llamaSelector ?: LlamaCppFunctionSelector(modelPath = llmModelPath).also { llamaSelector = it }
         } else {
@@ -329,23 +344,28 @@ class DriverAssistViewModel(
         val actions = selectorToUse.select(context = context, prompt = prompt)
         engineerJson = actionsToJson(actions)
         vehicleState = mockVehicleSystem.apply(vehicleState, actions)
+        AppLog.i("vm.run done actions=${actions.size} engineerJson_chars=${engineerJson.length}")
     }
 
     override fun onCleared() {
+        AppLog.i("vm.onCleared")
         closeLlm()
         super.onCleared()
     }
 
     fun downloadModelNow() {
+        AppLog.i("vm.downloadModelNow")
         ensureModelReady(forceDownload = true)
     }
 
     private fun ensureModelReady(forceDownload: Boolean) {
+        AppLog.i("vm.ensureModelReady start forceDownload=$forceDownload")
         val config = appConfig ?: run {
             modelDownloadState = ModelDownloadState(
                 phase = ModelDownloadPhase.Error,
                 message = "config_load_failed",
             )
+            AppLog.w("vm.ensureModelReady config_null")
             return
         }
 
@@ -363,18 +383,27 @@ class DriverAssistViewModel(
             val preferredOk = preferred != null && preferred.exists() && preferred.length() > 0L
             val fallbackOk = fallback.exists() && fallback.length() > 0L
 
+            AppLog.i(
+                "vm.ensureModelReady check " +
+                    "preferred=${preferred?.absolutePath} ok=$preferredOk bytes=${preferred?.length() ?: -1L} " +
+                    "fallback=${fallback.absolutePath} ok=$fallbackOk bytes=${fallback.length()}"
+            )
+
             if (!forceDownload) {
                 if (preferredOk) {
+                    AppLog.i("vm.ensureModelReady using_preferred")
                     setModelReady(preferred!!.absolutePath)
                     return@launch
                 }
                 if (fallbackOk) {
+                    AppLog.i("vm.ensureModelReady using_fallback")
                     setModelReady(fallback.absolutePath)
                     return@launch
                 }
             }
 
             if (config.modelUrl.isBlank()) {
+                AppLog.w("vm.ensureModelReady model_url_blank")
                 modelDownloadState = ModelDownloadState(
                     phase = ModelDownloadPhase.Error,
                     message = "model_url_blank",
@@ -390,6 +419,7 @@ class DriverAssistViewModel(
             var lastError: Throwable? = null
             for (dest in candidates) {
                 try {
+                    AppLog.i("vm.ensureModelReady downloading_to dest=${dest.absolutePath}")
                     var lastProgressUpdateMs = 0L
 
                     withContext(Dispatchers.IO) {
@@ -417,6 +447,7 @@ class DriverAssistViewModel(
                     setModelReady(dest.absolutePath)
                     return@launch
                 } catch (t: Throwable) {
+                    AppLog.e("vm.ensureModelReady download_failed dest=${dest.absolutePath}", t)
                     lastError = t
                 }
             }
@@ -426,6 +457,7 @@ class DriverAssistViewModel(
                 phase = ModelDownloadPhase.Error,
                 message = msg,
             )
+            AppLog.w("vm.ensureModelReady all_candidates_failed msg=$msg")
         }
     }
 
@@ -436,6 +468,7 @@ class DriverAssistViewModel(
     }
 
     private fun setModelReady(path: String) {
+        AppLog.i("vm.setModelReady path=$path")
         modelDownloadState = ModelDownloadState(
             phase = ModelDownloadPhase.Ready,
             resolvedModelPath = path,

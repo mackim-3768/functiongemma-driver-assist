@@ -187,3 +187,37 @@ FunctionGemma의 출력은 항상 **명확한 차량 액션 트리거**입니다
 ## 11. License
 
 This project is a demo application for research and demonstration purposes only.
+
+
+## 12. 로컬 설정 파일 적용 방법
+
+1) /data/local/tmp/.../application.yaml 정확한 경로
+  - 코드(AppConfigLoader.readConfigText) 기준으로 오버라이드 1순위 경로는 고정입니다.
+  - 정확한 경로: /data/local/tmp/functiongemma/application.yaml
+
+2) 참고로 로딩 우선순위는 아래 순서입니다.
+  - 1순위: /data/local/tmp/functiongemma/application.yaml
+  - 2순위: /storage/emulated/0/Android/data/com.functiongemma.driverassist/files/application.yaml (=getExternalFilesDir(null))
+  - 3순위: 앱 internal files (/data/data/.../files/application.yaml, adb로 접근 어려움)
+  - 마지막: assets/application.yaml
+
+3) adb로 넣는 방법
+  - [디렉토리 생성] : adb shell mkdir -p /data/local/tmp/functiongemma
+  - [파일 푸시] : adb push local.application.yaml /data/local/tmp/functiongemma/application.yaml
+  - [확인] : adb shell ls -l /data/local/tmp/functiongemma/application.yaml
+
+
+## 13. adb logcat에서 보는 방법
+
+1) Tag로만 필터링
+
+```bash
+adb logcat -s FunctionGemmaDriverAsst
+```
+
+2) 시간 포함 + Info 이상만
+
+```bash
+adb logcat -v time FunctionGemmaDriverAsst:I *:S
+이제 앱 실행 중에 config.sources selected=... 로그로 실제로 /data/local/tmp/...를 읽고 있는지 바로 확인 가능합니다.
+```

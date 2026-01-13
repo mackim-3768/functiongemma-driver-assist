@@ -2,6 +2,7 @@ package com.functiongemma.driverassist
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 
 class LlamaCppFunctionSelector(
     private val modelPath: String,
@@ -12,6 +13,7 @@ class LlamaCppFunctionSelector(
 
     override fun select(context: DriverAssistContext, prompt: String): List<VehicleAction> {
         if (modelPath.isBlank()) {
+            AppLog.w("llm.select model_path_blank")
             return listOf(
                 VehicleAction(
                     name = "log_safety_event",
@@ -20,19 +22,43 @@ class LlamaCppFunctionSelector(
             )
         }
 
+        val modelFile = runCatching { File(modelPath) }.getOrNull()
+        if (modelFile == null || !modelFile.exists() || modelFile.length() <= 0L || !modelFile.canRead()) {
+            AppLog.w(
+                "llm.select model_not_readable path=$modelPath " +
+                    "exists=${modelFile?.exists() == true} can_read=${modelFile?.canRead() == true} bytes=${modelFile?.length() ?: -1L}"
+            )
+            return listOf(
+                VehicleAction(
+                    name = "log_safety_event",
+                    arguments = mapOf(
+                        "message" to "llama_cpp_model_not_readable",
+                        "path" to modelPath,
+                        "exists" to (modelFile?.exists() == true),
+                        "can_read" to (modelFile?.canRead() == true),
+                        "bytes" to (modelFile?.length() ?: -1L),
+                    ),
+                ),
+            )
+        }
+
         return try {
+            AppLog.i("llm.select start path=$modelPath bytes=${modelFile.length()} prompt_chars=${prompt.length} temp=$temperature")
             val llamaModel = ensureModel()
             val input = buildPrompt(context = context, userPrompt = prompt)
             val outputText = complete(llamaModel, input)
             val jsonText = extractJsonArrayText(outputText)
+            AppLog.i("llm.select output_chars=${outputText.length} json_chars=${jsonText.length}")
             parseActions(jsonText)
         } catch (t: Throwable) {
+            AppLog.e("llm.select error path=$modelPath", t)
             val msg = (t.message ?: t::class.java.simpleName).take(200)
             listOf(
                 VehicleAction(
                     name = "log_safety_event",
                     arguments = mapOf(
                         "message" to "llama_cpp_error",
+                        "error_type" to t::class.java.name,
                         "detail" to msg,
                     ),
                 ),
@@ -42,6 +68,7 @@ class LlamaCppFunctionSelector(
 
     override fun close() {
         val current = model ?: return
+        AppLog.i("llm.close")
         runCatching {
             current.javaClass.getMethod("close").invoke(current)
         }
@@ -52,6 +79,8 @@ class LlamaCppFunctionSelector(
         val existing = model
         if (existing != null) return existing
 
+        AppLog.i("llm.ensure_model start")
+
         val modelParamsClass = Class.forName("de.kherud.llama.ModelParameters")
         val llamaModelClass = Class.forName("de.kherud.llama.LlamaModel")
 
@@ -60,6 +89,7 @@ class LlamaCppFunctionSelector(
 
         val newModel = llamaModelClass.getConstructor(modelParamsClass).newInstance(modelParams)
         model = newModel
+        AppLog.i("llm.ensure_model done")
         return newModel
     }
 
