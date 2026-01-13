@@ -36,6 +36,8 @@ local.properties
 captures/
 *.apk
 *.aab
-
+**/build/
+**/node_modules/
+node_modules/
 
 local.application.yaml
