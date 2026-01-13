@@ -21,7 +21,7 @@ object AppConfigLoader {
             hfToken = map["hf_token"].orEmpty(),
             preferredModelPath = map["preferred_model_path"].orEmpty(),
             fallbackRelativePath = map["fallback_relative_path"].orEmpty(),
-            autoDownloadOnStart = map["auto_download_on_start"].toBooleanStrictOrNull() ?: false,
+            autoDownloadOnStart = map["auto_download_on_start"]?.toBooleanStrictOrNull() ?: false,
         )
     }
 

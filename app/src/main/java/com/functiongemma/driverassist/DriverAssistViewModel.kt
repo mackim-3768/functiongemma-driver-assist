@@ -299,7 +299,7 @@ class DriverAssistViewModel(
         engineerModeEnabled = enabled
     }
 
-    fun setUseLlm(enabled: Boolean) {
+    fun updateUseLlm(enabled: Boolean) {
         useLlm = enabled
         if (!enabled) {
             closeLlm()
@@ -308,7 +308,7 @@ class DriverAssistViewModel(
         }
     }
 
-    fun setLlmModelPath(path: String) {
+    fun updateLlmModelPath(path: String) {
         if (path == llmModelPath) return
         llmModelPath = path
         closeLlm()
@@ -441,7 +441,7 @@ class DriverAssistViewModel(
             resolvedModelPath = path,
             message = "ready",
         )
-        setLlmModelPath(path)
+        updateLlmModelPath(path)
     }
 
     private fun actionsToJson(actions: List<VehicleAction>): String {
