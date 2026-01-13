@@ -1,0 +1,54 @@
+(.venv) dgkim@dgkim:~/source/functiongemma/llama.cpp$ ./build/bin/llama-cli \
+  -m functiongemma-270m-it.Q8_0.gguf \
+  -ngl 99 --temp 0.0 -n 80 -st \
+  --json-schema '{
+    "type":"object",
+    "properties":{
+      "name":{"const":"get_current_temperature"},
+      "arguments":{
+        "type":"object",
+        "properties":{"location":{"type":"string"}},
+        "required":["location"],
+        "additionalProperties":false
+      }
+    },
+    "required":["name","arguments"],
+    "additionalProperties":false
+  }' \
+  --prompt 'Return the tool call for "What is the current temperature in Seoul?"'
+ggml_cuda_init: found 1 CUDA devices:
+  Device 0: NVIDIA GeForce RTX 4060 Ti, compute capability 8.9, VMM: yes
+
+Loading model...
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b7643-bd2a93d47
+model      : functiongemma-270m-it.Q8_0.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read               add a text file
+
+
+> Return the tool call for "What is the current temperature in Seoul?"
+
+{"name": "get_current_temperature", "arguments": {"location": "Seoul"}}
+
+[ Prompt: 1103.0 t/s | Generation: 97.7 t/s ]
+
+Exiting...
+llama_memory_breakdown_print: | memory breakdown [MiB]  | total   free    self   model   context   compute    unaccounted |
+llama_memory_breakdown_print: |   - CUDA0 (RTX 4060 Ti) |  8187 = 6141 + ( 896 =   271 +     111 +     513) +        1150 |
+llama_memory_breakdown_print: |   - Host                |                  237 =   170 +       0 +      67                |
+(.venv) dgkim@dgkim:~/source/functiongemma/llama.cpp$
