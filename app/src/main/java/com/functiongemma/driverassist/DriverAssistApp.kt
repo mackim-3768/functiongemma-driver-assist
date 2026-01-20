@@ -317,6 +317,10 @@ private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerMode,
+                autoModeEnabled = viewModel.autoModeEnabled,
+                onAutoModeChanged = viewModel::toggleAutoMode,
+                gateResult = viewModel.gateResult,
+                safetyLogs = viewModel.safetyLogs,
                 useLlm = viewModel.useLlm,
                 llmModelPath = viewModel.llmModelPath,
                 onUseLlmChanged = viewModel::updateUseLlm,
@@ -339,6 +343,7 @@ private fun DriverAssistWideLayout(viewModel: DriverAssistViewModel) {
             prompt = viewModel.prompt,
             onPromptChange = viewModel::updatePrompt,
             onRun = viewModel::run,
+            autoModeEnabled = viewModel.autoModeEnabled,
         )
     }
 }
@@ -403,6 +408,10 @@ private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
                 engineerJson = viewModel.engineerJson,
                 engineerModeEnabled = viewModel.engineerModeEnabled,
                 onEngineerModeChanged = viewModel::setEngineerMode,
+                autoModeEnabled = viewModel.autoModeEnabled,
+                onAutoModeChanged = viewModel::toggleAutoMode,
+                gateResult = viewModel.gateResult,
+                safetyLogs = viewModel.safetyLogs,
                 useLlm = viewModel.useLlm,
                 llmModelPath = viewModel.llmModelPath,
                 onUseLlmChanged = viewModel::updateUseLlm,
@@ -425,6 +434,7 @@ private fun DriverAssistPhoneLayout(viewModel: DriverAssistViewModel) {
             prompt = viewModel.prompt,
             onPromptChange = viewModel::updatePrompt,
             onRun = viewModel::run,
+            autoModeEnabled = viewModel.autoModeEnabled,
         )
     }
 }
@@ -475,6 +485,64 @@ private fun ScenarioPanel(
 }
 
 @Composable
+private fun AutoModePanel(
+    modifier: Modifier,
+    autoModeEnabled: Boolean,
+    onAutoModeChanged: () -> Unit,
+    gateResult: GateResult?,
+) {
+    Card(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column {
+                    Text(text = "Auto Mode (Polling)", fontWeight = FontWeight.SemiBold)
+                    if (autoModeEnabled) {
+                        Text(
+                            text = "Monitoring sensors (5Hz)...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    } else {
+                        Text(
+                            text = "Paused",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Switch(
+                    checked = autoModeEnabled,
+                    onCheckedChange = { onAutoModeChanged() },
+                )
+            }
+
+            if (autoModeEnabled && gateResult != null) {
+                Text(
+                    text = if (gateResult.triggered) "TRIGGERED: ${gateResult.event}" else "PASS: ${gateResult.reason}",
+                    fontWeight = if (gateResult.triggered) FontWeight.Bold else FontWeight.Normal,
+                    color = if (gateResult.triggered) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
+                )
+                if (gateResult.triggered) {
+                    Text(
+                        text = "Reason: ${gateResult.reason}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun MainPanel(
     modifier: Modifier,
     context: DriverAssistContext,
@@ -482,6 +550,10 @@ private fun MainPanel(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    autoModeEnabled: Boolean,
+    onAutoModeChanged: () -> Unit,
+    gateResult: GateResult?,
+    safetyLogs: List<String>,
     useLlm: Boolean,
     llmModelPath: String,
     onUseLlmChanged: (Boolean) -> Unit,
@@ -505,6 +577,13 @@ private fun MainPanel(
             modifier = Modifier.fillMaxWidth(),
             context = context,
             warningLevel = vehicleState.warningLevel,
+        )
+
+        AutoModePanel(
+            modifier = Modifier.fillMaxWidth(),
+            autoModeEnabled = autoModeEnabled,
+            onAutoModeChanged = onAutoModeChanged,
+            gateResult = gateResult,
         )
 
         InputToolsPanel(
@@ -563,9 +642,18 @@ private fun MainPanel(
                         text = engineerJson,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier
-                            .fillMaxSize()
+                            .fillMaxWidth()
+                            .heightIn(max = 120.dp)
                             .verticalScroll(rememberScrollState()),
                     )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "Safety Gate Logs", fontWeight = FontWeight.SemiBold)
+                    LazyColumn(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                        items(safetyLogs) { log ->
+                             Text(text = log, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                        }
+                    }
                 }
             }
         }
@@ -601,6 +689,10 @@ private fun MainPanelCompact(
     engineerJson: String,
     engineerModeEnabled: Boolean,
     onEngineerModeChanged: (Boolean) -> Unit,
+    autoModeEnabled: Boolean,
+    onAutoModeChanged: () -> Unit,
+    gateResult: GateResult?,
+    safetyLogs: List<String>,
     useLlm: Boolean,
     llmModelPath: String,
     onUseLlmChanged: (Boolean) -> Unit,
@@ -626,6 +718,15 @@ private fun MainPanelCompact(
                 modifier = Modifier.fillMaxWidth(),
                 context = context,
                 warningLevel = vehicleState.warningLevel,
+            )
+        }
+        
+        item {
+            AutoModePanel(
+                modifier = Modifier.fillMaxWidth(),
+                autoModeEnabled = autoModeEnabled,
+                onAutoModeChanged = onAutoModeChanged,
+                gateResult = gateResult,
             )
         }
 
@@ -692,6 +793,15 @@ private fun MainPanelCompact(
                                 .heightIn(max = 240.dp)
                                 .verticalScroll(rememberScrollState()),
                         )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "Safety Gate Logs", fontWeight = FontWeight.SemiBold)
+                        // LazyColumn inside Scrollable Column (LazyColumn) is tricky, better to just use Column for logs in compact view or limit items
+                         Column {
+                            for (log in safetyLogs.takeLast(5)) {
+                                Text(text = log, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                            }
+                        }
                     }
                 }
             }
@@ -791,6 +901,7 @@ private fun PromptBar(
     prompt: String,
     onPromptChange: (String) -> Unit,
     onRun: () -> Unit,
+    autoModeEnabled: Boolean,
 ) {
     Card(modifier = modifier) {
         Row(
@@ -804,10 +915,14 @@ private fun PromptBar(
                 value = prompt,
                 onValueChange = onPromptChange,
                 modifier = Modifier.weight(1f),
-                label = { Text("Prompt") },
+                label = { Text(if (autoModeEnabled) "Prompt (Auto Mode ON)" else "Prompt") },
                 singleLine = true,
+                enabled = !autoModeEnabled,
             )
-            Button(onClick = onRun) {
+            Button(
+                onClick = onRun,
+                enabled = !autoModeEnabled
+            ) {
                 Text("Run")
             }
         }

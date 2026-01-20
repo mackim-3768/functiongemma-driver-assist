@@ -333,18 +333,98 @@ class DriverAssistViewModel(
         llamaSelector = null
     }
 
-    fun run() {
-        AppLog.i("vm.run start useLlm=$useLlm scenario=$selectedScenarioTitle")
-        val selectorToUse = if (useLlm) {
-            llamaSelector ?: LlamaCppFunctionSelector(modelPath = llmModelPath).also { llamaSelector = it }
-        } else {
-            selector
-        }
+    private val scenarioGate = ScenarioGate()
+    private val safetyGate = SafetyGate()
 
-        val actions = selectorToUse.select(context = context, prompt = prompt)
-        engineerJson = actionsToJson(actions)
-        vehicleState = mockVehicleSystem.apply(vehicleState, actions)
-        AppLog.i("vm.run done actions=${actions.size} engineerJson_chars=${engineerJson.length}")
+    var autoModeEnabled by mutableStateOf(false)
+        private set
+
+    var gateResult by mutableStateOf<GateResult?>(null)
+        private set
+
+    var safetyLogs by mutableStateOf<List<String>>(emptyList())
+        private set
+
+    private var autoLoopJob: Job? = null
+    private var lastLlmCallTime = 0L
+    private const val AUTO_MODE_LLM_INTERVAL_MS = 2000L
+
+    fun toggleAutoMode() {
+        autoModeEnabled = !autoModeEnabled
+        AppLog.i("vm.toggleAutoMode enabled=$autoModeEnabled")
+        if (autoModeEnabled) {
+            startAutoLoop()
+        } else {
+            stopAutoLoop()
+        }
+    }
+
+    private fun startAutoLoop() {
+        stopAutoLoop()
+        autoLoopJob = viewModelScope.launch {
+            while (autoModeEnabled) {
+                // 1. Context Snapshot is already 'context' (in real app, we might poll sensors here)
+                // For demo, we assume 'context' is updated by UI or simulator
+
+                // 2. Scenario Gate
+                val result = scenarioGate.evaluate(context)
+                gateResult = result
+
+                if (result.triggered) {
+                    val now = SystemClock.elapsedRealtime()
+                    if (now - lastLlmCallTime >= AUTO_MODE_LLM_INTERVAL_MS) {
+                        lastLlmCallTime = now
+                        // 3. Trigger Pipeline
+                        executePipeline(
+                            triggerSource = "Auto: ${result.event}",
+                            promptOverride = "Scenario detected: ${result.event}. ${result.reason}. Select appropriate actions."
+                        )
+                    }
+                }
+
+                kotlinx.coroutines.delay(200) // 5Hz polling
+            }
+        }
+    }
+
+    private fun stopAutoLoop() {
+        autoLoopJob?.cancel()
+        autoLoopJob = null
+        safetyGate.clear()
+    }
+
+    fun run() {
+        executePipeline(triggerSource = "Manual", promptOverride = null)
+    }
+
+    private fun executePipeline(triggerSource: String, promptOverride: String?) {
+        val currentPrompt = promptOverride ?: prompt
+        AppLog.i("vm.pipeline start source=$triggerSource scenario=$selectedScenarioTitle")
+
+        viewModelScope.launch {
+            val selectorToUse = if (useLlm) {
+                llamaSelector ?: LlamaCppFunctionSelector(modelPath = llmModelPath).also { llamaSelector = it }
+            } else {
+                selector
+            }
+
+            // 1. Select Actions (FunctionGemma / Stub)
+            val rawActions = withContext(Dispatchers.Default) {
+                selectorToUse.select(context = context, prompt = currentPrompt)
+            }
+
+            // 2. Safety Gate Filter
+            val safetyResult = safetyGate.filter(rawActions)
+            safetyLogs = safetyResult.logs
+
+            // 3. Update Engineer JSON (Show executed actions)
+            engineerJson = actionsToJson(safetyResult.executedActions)
+
+            // 4. Dispatch (Mock Vehicle System)
+            vehicleState = mockVehicleSystem.apply(vehicleState, safetyResult.executedActions)
+
+            AppLog.i("vm.pipeline done executed=${safetyResult.executedActions.size} blocked=${safetyResult.blockedActions.size}")
+        }
     }
 
     override fun onCleared() {
