@@ -41,3 +41,7 @@ captures/
 node_modules/
 
 local.application.yaml
+
+# Finetune outputs
+finetune/outputs_*/
+finetune/merged_*/
