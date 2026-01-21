@@ -1,7 +1,8 @@
-unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git
---no-deps xformers<0.0.26
-trl<0.9.0
+torch
+transformers
 peft
-accelerate
-bitsandbytes
 datasets
+accelerate
+sentencepiece
+protobuf
+huggingface_hub[cli]
