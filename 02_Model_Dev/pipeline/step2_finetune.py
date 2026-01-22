@@ -11,7 +11,7 @@ from transformers import (
     BitsAndBytesConfig,
 )
 from peft import LoraConfig, get_peft_model, TaskType
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
 
 def run_finetuning(dataset_path, output_dir, model_name, epochs, batch_size, learning_rate):
     print(f"Loading dataset from {dataset_path}...")
@@ -54,8 +54,8 @@ def run_finetuning(dataset_path, output_dir, model_name, epochs, batch_size, lea
     model = get_peft_model(model, peft_config)
     model.print_trainable_parameters()
 
-    # Training Args
-    training_args = TrainingArguments(
+    # Training Args (Using SFTConfig for trl >= 0.8.0)
+    training_args = SFTConfig(
         output_dir=output_dir,
         num_train_epochs=epochs,
         per_device_train_batch_size=batch_size,
@@ -65,15 +65,15 @@ def run_finetuning(dataset_path, output_dir, model_name, epochs, batch_size, lea
         eval_strategy="no", # We do eval separately in step 3
         fp16=True,
         report_to=["mlflow"],
+        dataset_text_field="text",
+        max_length=1024,
     )
 
     # Trainer
     trainer = SFTTrainer(
         model=model,
         train_dataset=dataset,
-        dataset_text_field="text", # The field generated in step 1
-        max_seq_length=1024,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         args=training_args,
     )
 
@@ -101,7 +101,7 @@ def main():
     parser.add_argument("--output-dir", type=str, default="model_output")
     parser.add_argument("--model-name", type=str, default="google/functiongemma-270m-it")
     parser.add_argument("--epochs", type=int, default=3)
-    parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--batch-size", type=int, default=6)
     parser.add_argument("--learning-rate", type=float, default=2e-4)
     parser.add_argument("--experiment-name", type=str, default=None, help="MLflow experiment name for standalone run")
     args = parser.parse_args()
