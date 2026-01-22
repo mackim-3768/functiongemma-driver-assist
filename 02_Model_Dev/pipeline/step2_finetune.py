@@ -62,7 +62,7 @@ def run_finetuning(dataset_path, output_dir, model_name, epochs, batch_size, lea
         learning_rate=learning_rate,
         logging_steps=10,
         save_strategy="epoch",
-        evaluation_strategy="no", # We do eval separately in step 3
+        eval_strategy="no", # We do eval separately in step 3
         fp16=True,
         report_to=["mlflow"],
     )
