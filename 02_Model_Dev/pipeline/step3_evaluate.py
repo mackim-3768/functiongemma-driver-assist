@@ -77,7 +77,8 @@ def run_evaluation(model_path, dataset_path, base_model_name, output_dir):
     print(f"Evaluating {len(samples)} samples...")
     
     # Import Metric
-    from chatbot_tester.evaluator.metrics.tool_call import ToolCallMatchMetric
+    # from chatbot_tester.evaluator.metrics.tool_call import ToolCallMatchMetric
+    from utils.metric_utils import ToolCallMatchMetric
     
     for sample in tqdm(samples):
         # Extract user prompt from canonical format
