@@ -1,0 +1,41 @@
+artifact_path: /Users/admin/01_Workspace/01_platform_hangang/01_function_gemma/02_functiongemma-driver-assist/02_Model_Dev/mlruns/3/models/m-2d7851c17040447282e4f4bfb2246277/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.transformers
+    python_version: 3.14.2
+  transformers:
+    code: null
+    components:
+    - tokenizer
+    framework: pt
+    instance_type: TextGenerationPipeline
+    peft_adaptor: peft
+    pipeline_model_type: Gemma3ForCausalLM
+    source_model_name: google/functiongemma-270m-it
+    source_model_revision: 39eccb091651513a5dfb56892d3714c1b5b8276c
+    task: text-generation
+    tokenizer_name: google/functiongemma-270m-it
+    tokenizer_revision: 39eccb091651513a5dfb56892d3714c1b5b8276c
+    tokenizer_type: GemmaTokenizerFast
+    torch_dtype: torch.float32
+    transformers_version: 4.57.6
+is_signature_from_type_hint: false
+mlflow_version: 3.8.1
+model_id: m-2d7851c17040447282e4f4bfb2246277
+model_size_bytes: 15248891
+model_uuid: m-2d7851c17040447282e4f4bfb2246277
+prompts: null
+run_id: 80a2b6ff9a614ccaa42a24bf6deba745
+saved_input_example_info:
+  artifact_path: input_example.json
+  serving_input_path: serving_input_example.json
+  type: json_object
+signature:
+  inputs: '[{"type": "string", "required": true}]'
+  outputs: '[{"type": "string", "required": true}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2026-01-23 04:37:51.392085'

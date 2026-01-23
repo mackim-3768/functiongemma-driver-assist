@@ -1,0 +1,177 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+The following generation flags are not valid and may be ignored: ['temperature', 'top_p', 'top_k']. Set `TRANSFORMERS_VERBOSITY=info` for more details.
+Loading base model: google/functiongemma-270m-it
+Tokenizer pad_token_id: 0
+Tokenizer eos_token_id: 1
+Loading adapter from: pipeline/history/01_seed/run/final_model
+Checking for NaNs in adapter parameters...
+NaN/Inf found in base_model.model.model.layers.0.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.0.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.1.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.2.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.3.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.4.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.5.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.6.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.7.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.8.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.9.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.10.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.11.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.12.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.13.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.14.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.15.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.16.self_attn.o_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.q_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.q_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.k_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.k_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.v_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.v_proj.lora_B.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.o_proj.lora_A.default.weight
+NaN/Inf found in base_model.model.model.layers.17.self_attn.o_proj.lora_B.default.weight
+CRITICAL: Adapter contains NaN/Inf values. Training likely failed.
+Input tokens: tensor([[     2,    105,   2364,    107,   3048,    659,  12939, 236823,  12367,
+         236761,    107,   2887,   5724,  20718, 236761,    107,  13293,  44917,
+            496,  10434,   3499,    529,   5904,   9139, 236761,    107,    106,
+            107,    105,   4368,    107]], device='mps:0')
+Attention mask: tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+         1, 1, 1, 1, 1, 1, 1]], device='mps:0')
+Generating...
+Output tokens: tensor([     2,    105,   2364,    107,   3048,    659,  12939, 236823,  12367,
+        236761,    107,   2887,   5724,  20718, 236761,    107,  13293,  44917,
+           496,  10434,   3499,    529,   5904,   9139, 236761,    107,    106,
+           107,    105,   4368,    107,      0,      0,      0,      0,      0,
+             0,      0,      0,      0,      0,      0,      0,      0,      0,
+             0,      0,      0,      0,      0,      0,      0,      0,      0,
+             0,      0,      0,      0,      0,      0,      0,      0,      0,
+             0,      0,      0,      0,      0,      0,      0,      0,      0,
+             0,      0,      0,      0,      0,      0,      0,      0,      0],
+       device='mps:0')
+Generated text:
+<bos><start_of_turn>user
+You are FunctionGemma.
+User looks tired.
+Return ONLY a JSON array of tool calls.
+<end_of_turn>
+<start_of_turn>model
+<pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad><pad>
