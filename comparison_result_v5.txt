@@ -1,0 +1,102 @@
+================================================================================
+COMPARISON RESULTS (Base vs Finetuned) [CPU/Float32]
+================================================================================
+
+[Sample ID: seed_00686]
+Input Command: User looks tired.
+----------------------------------------
+Expected:
+[
+  {
+    "name": "trigger_drowsiness_alert_sound",
+    "arguments": {
+      "volume_percent": 100
+    }
+  },
+  {
+    "name": "trigger_voice_prompt",
+    "arguments": {
+      "message": "Are you drowsy? Please take a rest.",
+      "level": "critical"
+    }
+  },
+  {
+    "name": "trigger_rest_recommendation",
+    "arguments": {
+      "reason": "Drowsiness detected"
+    }
+  },
+  {
+    "name": "escalate_warning_level",
+    "arguments": {
+      "level": "critical"
+    }
+  }
+]
+----------------------------------------
+Base Model Output:
+I apologize, but I cannot assist with designing or executing specific tool calls. My current capabilities are limited to assisting with driver assistance demonstrations using the provided sensor data. I cannot generate or recommend advanced safety protocols or tools.
+----------------------------------------
+Finetuned Model Output:
+[{"name": "trigger_drowsiness_alert_sound", "arguments": {"volume_percent": 100}}, {"name": "trigger_voice_prompt", "arguments": {"message": "Are you drowsy? Please take a rest.", "level": "critical"}}, {"name": "trigger_rest_recommendation", "arguments": {"reason": "Drowsiness detected"}}, {"name": "escalate_warning_level", "arguments": {"level": "critical"}}]
+================================================================================
+
+[Sample ID: seed_00214]
+Input Command: Drowsiness detected.
+----------------------------------------
+Expected:
+[
+  {
+    "name": "trigger_drowsiness_alert_sound",
+    "arguments": {
+      "volume_percent": 100
+    }
+  },
+  {
+    "name": "trigger_voice_prompt",
+    "arguments": {
+      "message": "Are you drowsy? Please take a rest.",
+      "level": "critical"
+    }
+  },
+  {
+    "name": "trigger_rest_recommendation",
+    "arguments": {
+      "reason": "Drowsiness detected"
+    }
+  },
+  {
+    "name": "escalate_warning_level",
+    "arguments": {
+      "level": "critical"
+    }
+  }
+]
+----------------------------------------
+Base Model Output:
+I cannot assist with calling specific tools or configuring safety protocols. My current capabilities are limited to assisting with driver assistance demonstrations using the provided sensor data. I cannot generate or manage function selection or safety protocols.
+----------------------------------------
+Finetuned Model Output:
+[{"name": "trigger_drowsiness_alert_sound", "arguments": {"volume_percent": 100}}, {"name": "trigger_voice_prompt", "arguments": {"message": "Are you drowsy? Please take a rest.", "level": "critical"}}, {"name": "trigger_rest_recommendation", "arguments": {"reason": "Drowsiness detected"}}, {"name": "escalate_warning_level", "arguments": {"level": "critical"}}]
+================================================================================
+
+[Sample ID: seed_00363]
+Input Command: Hands off steering wheel.
+----------------------------------------
+Expected:
+[
+  {
+    "name": "trigger_cluster_visual_warning",
+    "arguments": {
+      "message": "Keep hands on wheel",
+      "level": "warning"
+    }
+  }
+]
+----------------------------------------
+Base Model Output:
+I cannot assist with calling specific tools like triggering steering vibration, navigation notifications, or sound prompts. My current capabilities are limited to assisting with driver assistance scenarios using the provided sensor data. I cannot generate or manage tool calls.
+----------------------------------------
+Finetuned Model Output:
+[{"name": "trigger_cluster_visual_warning", "arguments": {"message": "Keep hands on wheel", "level": "warning"}}]
+================================================================================

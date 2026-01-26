@@ -24,6 +24,11 @@ def main():
     parser.add_argument("--lr", type=float, default=2e-4)
     parser.add_argument("--base-model", type=str, default="google/functiongemma-270m-it")
     
+    # Eval Params
+    parser.add_argument("--geval", action="store_true", help="Enable OpenAI G-Eval judging")
+    parser.add_argument("--geval-model", type=str, default="gpt-4o-mini")
+    parser.add_argument("--geval-max-samples", type=int, default=0, help="0 means judge all samples")
+    
     args = parser.parse_args()
     
     # Setup Output Dir
@@ -83,16 +88,22 @@ def main():
         with ctx.step("evaluation") as step3_dir:
             print("\n[Step 3] Evaluation")
             
-            metrics, res_path = run_evaluation(
+            metrics, res_path, geval_path = run_evaluation(
                 model_path=model_path,
                 dataset_path=c_path,
                 base_model_name=args.base_model,
-                output_dir=step3_dir
+                output_dir=step3_dir,
+                enable_geval=args.geval,
+                geval_model=args.geval_model,
+                geval_max_samples=args.geval_max_samples,
             )
             
             # Log metrics
             ctx.log_metrics(metrics)
             ctx.log_artifact(res_path)
+
+            if geval_path:
+                ctx.log_artifact(geval_path)
             
             # Check Threshold
             if metrics["accuracy_total"] < 0.8:
